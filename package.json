@@ -12,7 +12,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@okta/okta-auth-js": "^1.8.0",
     "@okta/okta-react": "0.0.7",
+    "@okta/okta-signin-widget": "^2.3.0",
     "axios": "^0.16.2",
     "body-parser": "^1.18.1",
     "bootstrap": "^3.3.7",

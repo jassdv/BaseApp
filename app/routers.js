@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
-import Home from './components/Home';
-import Login from './components/Login';
+//import Home from './components/Home';
+//import Login from './components/Login';
 import Signup from './components/Signup';
 import UserDetail from './components/UserDetail';
 import Root from './components/Root';
@@ -19,11 +19,20 @@ import { fetchQuantitySKUs } from './redux/quantity_SKU';
 import { fetchDataSets } from './redux/data_set';
 import { fetchDCompanies, fetchAccountStates } from './redux/company';
 import { Security, SecureRoute, ImplicitCallback } from '@okta/okta-react';
+import Home from './components/OktaHome';
+import Login from './components/OktaLogin';
+import Protected from './components/OktaProtected'
+
 
 const config = {
   issuer: 'https://dev-120406.oktapreview.com/oauth2/default',
-  redirectUri: window.location.origin + '/implicit/callback',
+  redirectUri: 'http://localhost:3000/implicit/callback',
   clientId: '0oacmp72gaMZcB9nX0h7'
+}
+
+
+function onAuthRequired({history}) {
+  history.push('/login');
 }
 
 /* -----------------    COMPONENT     ------------------ */
@@ -32,18 +41,13 @@ const Routes = ({ fetchInitialData }) => (
   <Router history={browserHistory}>
     <Security issuer={config.issuer}
               client_id={config.clientId}
-              redirect_uri={config.redirect_uri}>
-    <Route path="/" component={Root} onEnter={fetchInitialData}>
-      <IndexRoute component={Home} />
-      <Route path="login" component={Login} />
-      <Route path="signup" component={Signup} />
-      <Route path="signup_preferences" component={SignupPreferences} />
-      <Route path="signup_payment" component={SignupPayment} />
-      <Route path="users/:id" component={UserDetail} />
-      <Route path="user_settings" component={UserSettings}/>
-      <Route path="implicit/callback" component={ImplicitCallback} />
-    </Route>
-    <Route path="*" component={Home} />
+              redirect_uri={config.redirect_uri}
+              onAuthRequired={onAuthRequired}>
+          <Route path='/' exact={true} component={Home} />
+          <SecureRoute path='/protected' component={Protected} />
+          <Route path='/login' render={() => <Login baseUrl='https://dev-120406.oktapreview.com' />} />
+          <Route path='/implicit/callback' component={ImplicitCallback} />
+    
    </Security>
   </Router>
 );
@@ -67,3 +71,18 @@ const mapDispatch = dispatch => ({
 
 export default connect(mapProps, mapDispatch)(Routes);
 //<IndexRoute component={Home} />
+
+
+/*
+<Route path="/" component={Root} onEnter={fetchInitialData}>
+      <IndexRoute component={Home} />
+      <Route path="login" component={Login} />
+      <Route path="signup" component={Signup} />
+      <Route path="signup_preferences" component={SignupPreferences} />
+      <Route path="signup_payment" component={SignupPayment} />
+      <Route path="users/:id" component={UserDetail} />
+      <Route path="user_settings" component={UserSettings}/>
+      <Route path="implicit/callback" component={ImplicitCallback} />
+    </Route>
+    <Route path="*" component={Home} />
+ */

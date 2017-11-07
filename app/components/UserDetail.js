@@ -3,6 +3,10 @@ import { connect } from 'react-redux';
 
 /* -----------------    COMPONENT     ------------------ */
 
+/*
+todo: 
+add links to FD, 
+ */
 class UserDetail extends React.Component {
 	constructor(props){
 		super(props);
