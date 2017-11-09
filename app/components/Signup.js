@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { hashHistory,browserHistory } from 'react-router';
-import { signupAndGoToUser,signupAndGoToUSetPreferences } from '../redux/auth';
+import { signupAndGoToUser,signupAndGoToUSetPreferences, signup, enrollEmailFactor, activateEmail, activateUser} from '../redux/auth';
 
 
 /* -----------------    COMPONENT     ------------------ */
@@ -101,17 +101,24 @@ class Signup extends React.Component {
 		);
 		
 		let accountState = company[0].account_state
-    const credentials = {
+    	const credentials = {
 			firstName: event.target.firstName.value,
 			lastName: event.target.lastName.value,
-      email: event.target.email.value,
+      		email: event.target.email.value,
 			password: event.target.password.value,
 			company_id:	companyId,
 			employeeTitle: employeeTitleId,
 			accoun_state: accountState,
 			admin: true
 		};
-    this.props.signup(credentials);
+		let user_id = this.props.signup(credentials);
+		let oktaUserInfo = {
+			email: credentials.email,
+			user_id: user_id
+		};
+		//debugger;
+		//this.props.enrollEmailFactor(oktaUserInfo);
+	
 	}
 	
 	/*
@@ -148,8 +155,13 @@ const mapState = (state) => ({
 	 companies: state.company.list
 	});
 
-const mapDispatch = { signup: signupAndGoToUSetPreferences };
-
+//orginal: const mapDispatch = { signup: signupAndGoToUSetPreferences };
+const mapDispatch = { 
+	signup: signup,
+	enrollEmailFactor: enrollEmailFactor,
+	activateEmail: activateEmail,
+	activateUser: activateUser
+};
 
 export default connect(mapState, mapDispatch)(Signup);
 

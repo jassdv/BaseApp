@@ -1,5 +1,5 @@
-// components/Protected.js
+// // components/Protected.js
 
-import React from 'react';
+// import React from 'react';
 
-export default () => <h3>Protected</h3>;
+// export default () => <h3>Protected</h3>;
