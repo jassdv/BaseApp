@@ -9,6 +9,7 @@ const Timezone = require('../db/models/timezone');
 const QuantitySKU = require('../db/models/quantity_SKU');
 const Dataset = require('../db/models/data_set');
 const Company = require('../db/models/company');
+const request = require('request');
 //router.use('/industry', require('./industry'));
 
 // check currently-authenticated user, i.e. "who am I?"
@@ -48,6 +49,32 @@ router.get('/login', function(req, res, next) {
 //  //return next(error)
 //  res.status(404).send(error);
 //return next(new Error(res.statusMessage));
+});
+
+router.post('/login',function(req,res,next){
+  var options = { 
+    method: 'POST',
+    url: 'https://dev-120406.oktapreview.com/oauth2/default/v1/token',
+    headers: 
+    { 'postman-token': '11baf0dd-9792-2f4f-bd36-dfdd88de439f',
+      'cache-control': 'no-cache',
+      authorization: 'Basic MG9hY3BndTBqN2htNG42ZnEwaDc6bmttZ2l2alI4U2d4OG1GNE9wN2tHRkN0Y0V3cmMwWmtmU2tNbVdaRQ==',
+      'content-type': 'application/x-www-form-urlencoded' },
+    form: 
+    { scope: 'offline_access',
+      username: req.body.email,
+      grant_type: req.body.password,
+      password: 'Helloyas123' 
+    } 
+  };
+
+request(options, function (error, response, body) {
+  if (error) throw new Error(error);
+
+  console.log(body);
+  res.send(body);
+});
+
 });
 
 router.post('/signup', function (req, res, next) {

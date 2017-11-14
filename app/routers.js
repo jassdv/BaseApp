@@ -11,6 +11,7 @@ import  SignupPayment  from './components/SignupPayment';
 import addCompany from './components/addCompany';
 import UserSettings from './components/UserSettings';
 import Passcode from './components/Passcode';
+import ServiceProviders from './components/ServiceProviders'
 //import Logout from './components/Logout';
 import { retrieveLoggedInUser } from './redux/auth';
 import { fetchIndustries } from './redux/industry';
@@ -49,6 +50,7 @@ const Routes = ({ fetchInitialData }) => (
       <Route path="signup_preferences" componenet={SignupPreferences} />
       <Route path="users/:id" component={UserDetail} />
       <Route path="passcode" component={Passcode} />
+      <Route path="service_providers" component={ServiceProviders} />
     </Route>
     <Route path="*" component={Home} />
   </Router>

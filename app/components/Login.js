@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { loginAndGoToUser } from '../redux/auth';
+import { login,loginAndGoToUser } from '../redux/auth';
 
 /* -----------------    COMPONENT     ------------------ */
 
@@ -71,7 +71,7 @@ return (
   });
 };
 
-const mapDispatch = { login: loginAndGoToUser };
+const mapDispatch = { login: login};
 // // equivalent to:
 // const mapDispatch = (dispatch) => {
 //   return {

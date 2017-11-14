@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {Router, browserHistory } from 'react-router';
-import { push } from 'react-router-redux'
+import { push } from 'react-router-redux';
+//const fetch = require("fetch");
 
 const DiscoverOktaOrg = "dev-120406.oktapreview.com";
 /* ------------------    ACTIONS    --------------------- */
@@ -12,7 +13,7 @@ const SET_USER_ID = 'SET_USER_ID';
 const SET_ACCOUNT_STATUS = 'SET_ACCOUNT_STATUS';
 const SET_EMAIL_FACTOR_ID = 'SET_EMAIL_FACTOR_ID';
 const SET_USER_EMAIL = 'SET_USER_EMAIL';
-
+const SET_ACCESS_TOKRN =  'SET_ACCESS_TOKRN';
 /* --------------    ACTION CREATORS    ----------------- */
 
 const set     = user => ({ type: SET, user });
@@ -23,6 +24,7 @@ const set_user_id = (user_id) => ({type: SET_USER_ID, user_id});
 const set_account_status = (account_status)=>({type: SET_ACCOUNT_STATUS, account_status});
 const set_email_factor_id = (email_factor_id) => ({type: SET_EMAIL_FACTOR_ID, email_factor_id});
 const set_user_email = (user_email) => ({type: SET_USER_EMAIL, user_email});
+const set_access_token = (access_token) => ({type: SET_ACCESS_TOKRN,access_token });
 
 /* ------------------    REDUCER    --------------------- */
 
@@ -57,10 +59,12 @@ const initialAuthState = {
       case SET_EMAIL_FACTOR_ID:
         newState.currentUser.email_factor_id = action.email_factor_id;
         return newState;
-      case set_user_email:
+      case SET_USER_EMAIL:
         newState.currentUser.email = action.user_email;
         return newState;
-
+      case SET_ACCESS_TOKRN:
+        newState.currentUser.access_token = action.access_token;
+        return newState;
       default:
         //return initialAuthState;
         return state;
@@ -82,21 +86,91 @@ const resToData = res => res.data;
 // };
 
 export const login = credentials => dispatch => {
-  return axios.post('/api/login/local', credentials)
-  .then((res) => {
-    dispatch(retrieveLoggedInUser());
-    return resToData;
-  }).catch(err => {
-    if(err.response){
-      console.log("in login, got an error",err.response.statusText);
-      return err.response.statusText;
-
+  var settings = {
+    "async": true,
+    "crossDomain": true,
+    "url": "https://dev-120406.oktapreview.com/oauth2/auscepilo1ZTq8ZJk0h7/v1/token",
+    "method": "POST",
+    "headers": {
+      "content-type": "application/x-www-form-urlencoded",
+      "data-type": "json", 
+      "accept": "application/json",
+      "authorization": "Basic MG9hY3BndTBqN2htNG42ZnEwaDc6bmttZ2l2alI4U2d4OG1GNE9wN2tHRkN0Y0V3cmMwWmtmU2tNbVdaRQ==",
+      "cache-control": "no-cache",
+      "postman-token": "7fb2c254-86a2-8ef1-9c75-1f06aefd595b"
+    },
+    "data": {
+      
+        "username": credentials.email,
+        "password": credentials.password,
+        "grant_type":  "password",
+        "scope": "offline_access"
     }
-    //return axios.get('api/login/local')
+  
+  }
+  
+ 
+  // return axios(settings)
+  // .then(resToData)
+  // .then((res) => {
+  //   //dispatch email, accessToken
+  //   debugger;
+  //   dispatch(set_user_email(credentials.email));
+  //   dispatch(set_access_token(res.access_token));
+  //   return browserHistory.push('/service_providers'); //TODO: add a page to service providers link
+  // }).catch(err => {
+  //   if(err.response){
+  //     debugger;
+  //     console.log("in login, got an error",err);
+  //     return err.response.statusText;
+
+  //   }
+  //   //return axios.get('api/login/local')
+  //   console.log("in login, got an error",err);
+  //   return err;
+  // });
+
+  
+   return axios.post('/api/login', credentials)
+   .then(resToData)
+   .then(res => {
+    //debugger;
+    dispatch(set_user_email(credentials.email));
+    dispatch(set_access_token(res.access_token));
+    return browserHistory.push('/service_providers'); 
+  })
+  .catch(err => {
     console.log("in login, got an error",err);
+  });
+   
+};
+
+export const redirectFD = credentials => dispatch => {
+  var settings = {
+    "async": true,
+    "crossDomain": true,
+    "url": "http:///okta_sso/api/v1.0%20HTTP/1.1",  //should be saved in config file
+    "method": "GET",
+    "headers": {
+      "host": "njdmz023:5000",  //Should be saved in config file
+      "authorization": "Bearer " + credentials.access_token,
+      "cache-control": "no-cache",
+      "postman-token": "55da5fd2-358b-d061-a817-570bb8b8b3ac"
+    }
+  }
+  debugger;
+  axios(settings)
+  .then(resToData)
+  .then(res => {
+    console.log("res from FD redirect", res);
+  })
+  .catch(err => {
+    debugger;
+    console.log("in redirect FD, got an error",err);
     return err;
   });
-};
+
+}
 
 // a "composed" dispatcher which uses the "simple" one, then routes to a page.
 // export const loginAndGoToUser = credentials => dispatch => {
@@ -117,6 +191,7 @@ export const loginAndGoToUser = credentials => dispatch => {
       //return dispatch(push('/login'));
 
     }
+    console.log("res from token request", res);
     return browserHistory.push(`/users/${res.id}`)
   })
   .catch(err => {
@@ -364,6 +439,7 @@ dispatch => {
 
 
 /*
+//the signup API to use when enrolling a user into a group
 var settings = {
   "async": true,
   "crossDomain": true,
@@ -374,13 +450,42 @@ var settings = {
     "content-type": "application/json",
     "authorization": "SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu",
     "cache-control": "no-cache",
-    "postman-token": "e36725f8-b55c-4d60-3106-15d411bd83eb"
+    "postman-token": "d34ad96e-5759-eb8c-36a1-83d7348f83aa"
   },
   "processData": false,
-  "data": "{\n  \"profile\": {\n    \"firstName\": \"eli\",\n    \"lastName\": \"Test\",\n    \"email\": \"eliavtes248@gmail.com\",\n    \"login\": \"eliavtes248@gmail.com\"\n  },\n  \"credentials\": {\n    \"password\" : { \"value\": \"HelloEli248\" },\n    \"recovery_question\": {\n      \"question\": \"Who's your best friend?\",\n      \"answer\": \"lior\"\n    }\n  }\n}"
+  "data": "{\n  \"profile\": {\n    \"firstName\": \"Isaac\",\n    \"lastName\": \"Brock\",\n    \"email\": \"isaac@example.com\",\n    \"login\": \"isaac@example.com\"\n  },\n  \"groupIds\": [\n    \"\"\n  ]\n}"
 }
 
 $.ajax(settings).done(function (response) {
   console.log(response);
 });
- */
+ 
+
+
+The Authentication code to get an access token:
+
+var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "https://dev-120406.oktapreview.com/oauth2/default/v1/token",
+  "method": "POST",
+  "headers": {
+    "authorization": "Basic MG9hY3BndTBqN2htNG42ZnEwaDc6bmttZ2l2alI4U2d4OG1GNE9wN2tHRkN0Y0V3cmMwWmtmU2tNbVdaRQ==",
+    "cache-control": "no-cache",
+    "postman-token": "9d3d9ece-5102-824c-9c79-4ef58a4cf85e",
+    "content-type": "application/x-www-form-urlencoded"
+  },
+  "data": {
+    "scope": "offline_access",
+    "username": "yasmin_dvir@hotmail.com",  //need to be changed to the user who logged in
+    "grant_type": "password",
+    "password": "Helloyas123"               ////need to be changed to the user who logged in
+  }
+}
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});
+
+*/
+
