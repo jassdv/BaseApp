@@ -86,51 +86,6 @@ const resToData = res => res.data;
 // };
 
 export const login = credentials => dispatch => {
-  var settings = {
-    "async": true,
-    "crossDomain": true,
-    "url": "https://dev-120406.oktapreview.com/oauth2/auscepilo1ZTq8ZJk0h7/v1/token",
-    "method": "POST",
-    "headers": {
-      "content-type": "application/x-www-form-urlencoded",
-      "data-type": "json", 
-      "accept": "application/json",
-      "authorization": "Basic MG9hY3BndTBqN2htNG42ZnEwaDc6bmttZ2l2alI4U2d4OG1GNE9wN2tHRkN0Y0V3cmMwWmtmU2tNbVdaRQ==",
-      "cache-control": "no-cache",
-      "postman-token": "7fb2c254-86a2-8ef1-9c75-1f06aefd595b"
-    },
-    "data": {
-      
-        "username": credentials.email,
-        "password": credentials.password,
-        "grant_type":  "password",
-        "scope": "offline_access"
-    }
-  
-  }
-  
- 
-  // return axios(settings)
-  // .then(resToData)
-  // .then((res) => {
-  //   //dispatch email, accessToken
-  //   debugger;
-  //   dispatch(set_user_email(credentials.email));
-  //   dispatch(set_access_token(res.access_token));
-  //   return browserHistory.push('/service_providers'); //TODO: add a page to service providers link
-  // }).catch(err => {
-  //   if(err.response){
-  //     debugger;
-  //     console.log("in login, got an error",err);
-  //     return err.response.statusText;
-
-  //   }
-  //   //return axios.get('api/login/local')
-  //   console.log("in login, got an error",err);
-  //   return err;
-  // });
-
-  
    return axios.post('/api/login', credentials)
    .then(resToData)
    .then(res => {
@@ -145,30 +100,40 @@ export const login = credentials => dispatch => {
    
 };
 
-export const redirectFD = credentials => dispatch => {
-  var settings = {
-    "async": true,
-    "crossDomain": true,
-    "url": "http:///okta_sso/api/v1.0%20HTTP/1.1",  //should be saved in config file
-    "method": "GET",
-    "headers": {
-      "host": "njdmz023:5000",  //Should be saved in config file
-      "authorization": "Bearer " + credentials.access_token,
-      "cache-control": "no-cache",
-      "postman-token": "55da5fd2-358b-d061-a817-570bb8b8b3ac"
-    }
-  }
-  debugger;
-  axios(settings)
+export const redirectFD = access_token => dispatch => {
+  // var settings = {
+  //   "async": true,
+  //   "crossDomain": true,
+  //   "url": "https://njtestshib.corp.1010data.com/osupport/api/v1.0",
+  //   "method": "GET",
+  //   "headers": {
+  //     "authorization": "Bearer " + access_token,
+  //     "cache-control": "no-cache",
+  //     "postman-token": "b5fcb746-f40c-e24f-f100-998526e21b88",
+  //     'content-type': 'application/x-www-form-urlencoded',
+  //     "Access-Control-Allow-Origin": "*"
+      
+  //   }
+  // }
+  return axios.get('/api/redirect_fd', access_token)
   .then(resToData)
   .then(res => {
-    console.log("res from FD redirect", res);
+    console.log("got back to redirectFD front end res", res);
   })
   .catch(err => {
-    debugger;
     console.log("in redirect FD, got an error",err);
-    return err;
   });
+  //debugger;
+  // axios(settings)
+  // .then(resToData)
+  // .then(res => {
+  //   console.log("res from FD redirect", res);
+  // })
+  // .catch(err => {
+  //   debugger;
+  //   console.log("in redirect FD, got an error",err);
+  //   return err;
+  // });
 
 }
 
@@ -220,7 +185,8 @@ export const signup = credentials => dispatch => {
       "content-type": "application/json",
       "authorization": "SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu", //would need to take the API key from a config file
       "cache-control": "no-cache",
-      "postman-token": "e36725f8-b55c-4d60-3106-15d411bd83eb"             //what is POSTMAN token ???
+      "postman-token": "e36725f8-b55c-4d60-3106-15d411bd83eb"
+      
     },
     "processData": false,
     "data": 
@@ -229,15 +195,17 @@ export const signup = credentials => dispatch => {
               "firstName": credentials.firstName,
               "lastName": credentials.lastName,
               "email": credentials.email,
-              "login": credentials.email
+              "login": credentials.email,
+              "company": credentials.company_name
               },
-              "credentials": {
+           "credentials": {
                 "password" : { "value": credentials.password },
                 "recovery_question": {
                   "question": "Who's your best friend?",                    //do we want a recovery question??
                   "answer": "lior"
                 }
-            }
+            },
+            "groupIds": ["00gcsb5ip1KFAMYHz0h7"]
       }
   }
   
@@ -254,18 +222,19 @@ export const signup = credentials => dispatch => {
     //return res.id;
   })
   .then(factor_id => {
+    //debugger;
     dispatch(set_email_factor_id(factor_id));
     return browserHistory.push('/passcode');
   })
   .catch(function(err){
-    debugger;
+    //debugger;
     console.log("error:", err);
   });
   
 };
 
 export const enrollEmailFactor = credentials => {
-  debugger;
+  //debugger;
   var settings = {
     "async": true,
     "crossDomain": true,
@@ -291,14 +260,14 @@ export const enrollEmailFactor = credentials => {
   return axios(settings)
   .then(resToData)
   .then(res => {
-    debugger;
+    //debugger;
     console.log('res from create a new user',res);
     // dispatch(set_email_factor_id(res.id));
     // //TODO: redirect to a "passcode" form page
     // return browserHistory.push('/passcode');
     return res.id;
   }).catch(function(err){
-    debugger;
+    //debugger;
     console.log("error:", err);
   });
   
@@ -331,7 +300,7 @@ export const activateEmail = credentials => dispatch => { //credientials should 
 
   })
   .catch(err => {
-    debugger;
+    //debugger;
     console.log("error:", err);
     return false;
 
@@ -339,7 +308,7 @@ export const activateEmail = credentials => dispatch => { //credientials should 
 };
 
 export const activateUser = credentials => dispatch => {  //credentials should have user_id
-  debugger;
+  //debugger;
   var settings = {
     "async": true,
     "crossDomain": true,
@@ -362,7 +331,7 @@ export const activateUser = credentials => dispatch => {  //credentials should h
     dispatch(set_account_status(res.status));
     return browserHistory.push('/login');
   }).catch(err => {
-    debugger;
+    //debugger;
     console.log("error:", err);
   });
 }

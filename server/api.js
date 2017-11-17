@@ -63,8 +63,8 @@ router.post('/login',function(req,res,next){
     form: 
     { scope: 'offline_access',
       username: req.body.email,
-      grant_type: req.body.password,
-      password: 'Helloyas123' 
+      grant_type: 'password',
+      password: req.body.password 
     } 
   };
 
@@ -76,6 +76,34 @@ request(options, function (error, response, body) {
 });
 
 });
+
+router.get('/redirect_fd',function(req,res,next){
+  var options = { method: 'GET',
+  url: 'http://njtestshib.corp.1010data.com/osupport/api/v1.0',
+  headers: 
+   { 'postman-token': '4ba70d40-b5c9-840f-31ff-a060f0e3fe4f',
+     'cache-control': 'no-cache',
+     authorization: 'Bearer '+ req.body.access_token } };
+
+let r = request(options, function (error, response, body) {
+  if (error) throw new Error(error);
+
+  console.log(body);
+  //console.log("respose:", response)
+  console.log('r.uri.href', r.uri.href);
+  console.log('response.request.uri.href',response.request.uri.href);
+  res.send(r.uri.href);
+
+  /*
+  var r = request.get('http://google.com?q=foo', function (err, res, body) {
+  console.log(r.uri.href);
+  console.log(res.request.uri.href);
+   */
+});
+
+});
+
+
 
 router.post('/signup', function (req, res, next) {
   User.findOrCreate({

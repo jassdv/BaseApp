@@ -90,8 +90,9 @@ class Signup extends React.Component {
 
 
 		//getting the company id
-		let companyId = (event.target.company.value).split(' ');
-		companyId = parseInt(companyId[0]);
+		let companyvalue = (event.target.company.value).split(' ');
+		let companyId = parseInt(companyvalue[0]);
+		let companyName = companyvalue[1];
 
 		//finding the company's account state
 		let companies = this.props.companies;
@@ -107,15 +108,17 @@ class Signup extends React.Component {
       		email: event.target.email.value,
 			password: event.target.password.value,
 			company_id:	companyId,
+			company_name: companyName,
 			employeeTitle: employeeTitleId,
 			accoun_state: accountState,
 			admin: true
 		};
 		let user_id = this.props.signup(credentials);
-		let oktaUserInfo = {
-			email: credentials.email,
-			user_id: user_id
-		};
+		// let oktaUserInfo = {
+		// 	email: credentials.email,
+		// 	user_id: user_id
+
+		// };
 		//debugger;
 		//this.props.enrollEmailFactor(oktaUserInfo);
 	

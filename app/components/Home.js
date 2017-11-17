@@ -12,7 +12,7 @@ class Home extends React.Component {
 	render(){
 		return (
 			<div className="banner text-center text-inverted">
-			<h1>Simple App for signup and login</h1>
+			
 			
 		</div>
 		);

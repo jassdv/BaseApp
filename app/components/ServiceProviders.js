@@ -8,6 +8,7 @@ import { redirectFD } from '../redux/auth'
 class ServiceProviders extends React.Component {
     constructor(props) {
       super(props);
+      this.onSupport = this.onSupport.bind(this);
       
     }
 
@@ -15,25 +16,37 @@ class ServiceProviders extends React.Component {
         return(
             <div className="container-fluid">
                 <div>
-                    <button
-                        className="navbar-btn btn btn-default sign-btn"
-                        onClick={this.props.redirectFD(this.props.access_token)}>
-                        Support
-                    </button>
+                <a href="#" onClick={this.onSupport} className="sign-field-title" target="_blank">Support</a>
                 </div>
                 <div>
-                    <a href="https://discover.1010data.com/" activeClassName="active" className="sign-field-title" target="_blank">Discover 1010Data</a>
+                    <a href="https://discover.1010data.com/" className="sign-field-title" target="_blank">Discover 1010Data</a>
                 </div>
                 <div>
-                    <a href="https://aws.amazon.com/" activeClassName="active" className="sign-field-title" target="_blank">AWS</a>
+                    <a href="https://aws.amazon.com/" className="sign-field-title" target="_blank">AWS</a>
                 </div>
             </div>
         );
     }
+    onSupport(event){
+        event.preventDefault();
+        this.props.redirectFD(this.props.access_token);
+
+
+    }
+
 
 
 }
 
+/*
+<button
+                        className="navbar-btn btn btn-default sign-btn"
+                        onClick={this.onSupport}>
+                        Support
+                </button>
+
+<a href={this.props.redirectFD(this.props.access_token)} className="sign-field-title" target="_blank">Support</a>
+ */
 /* -----------------    CONTAINER     ------------------ */
 
 const mapState = state => 
