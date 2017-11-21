@@ -3,11 +3,9 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const path = require('path');
-//const db_user = require('../db/index').User; 
 const session = require('express-session');
 const flash = require('connect-flash');
 const cookieParser = require('cookie-parser');
-//const passport = require('passport');
 const pkg = require('../package.json'); 
 var db = require('../db/models');
 
@@ -65,7 +63,7 @@ app.use(require('./passport_middleware'));
 app.use('/api', require('./api'));
 
 //starting up the server:
-const port = process.env.PORT || 3000; // this can be very useful if you deploy to Heroku!
+const port = process.env.PORT || 3000; 
 // app.listen(port, function () {
 //   console.log(`*** starting server, listening on port ${port} ***`);
 // });

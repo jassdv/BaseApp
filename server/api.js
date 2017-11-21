@@ -10,8 +10,11 @@ const QuantitySKU = require('../db/models/quantity_SKU');
 const Dataset = require('../db/models/data_set');
 const Company = require('../db/models/company');
 const request = require('request');
-//router.use('/industry', require('./industry'));
 
+/************************************************************** 
+ * we would need a function here that returns current lohgged user
+ * should be implemented with Okta's APIs
+ **************************************************************
 // check currently-authenticated user, i.e. "who am I?"
 router.get('/me', function (req, res, next) {
   // with Passport:
@@ -23,34 +26,12 @@ router.get('/me', function (req, res, next) {
 
   
 });
-
-
-// signup, i.e. "let `me` introduce myself"
-router.post('/login/local',
-passport.authenticate('local', { successRedirect: '/',
-                                 failureRedirect: '/api/login',
-                                 failureFlash: true })
-);
-
-router.get('/login', function(req, res, next) {
- 
-  var err = req.flash('message')[0];
-  console.log("get login message",err);
-  //res.send(req.flash);
- //res.render('login');
- res.statusMessage = err;
- //res.status(404).end();
-
- res.status(401).send({success: false, error: {message: err}});
-//  var error = new Error(err);
-//  error.code = 400;
-//  res.status(400);
-//  console.log('error message',error.message);
-//  //return next(error)
-//  res.status(404).send(error);
-//return next(new Error(res.statusMessage));
-});
-
+*/
+/*
+login route
+When the user logs into e-commerce the frontend routes here
+this is the function that calls Okta's Access Token API for login and SSO
+ */
 router.post('/login',function(req,res,next){
   var options = { 
     method: 'POST',
@@ -58,7 +39,7 @@ router.post('/login',function(req,res,next){
     headers: 
     { 'postman-token': '11baf0dd-9792-2f4f-bd36-dfdd88de439f',
       'cache-control': 'no-cache',
-      authorization: 'Basic MG9hY3BndTBqN2htNG42ZnEwaDc6bmttZ2l2alI4U2d4OG1GNE9wN2tHRkN0Y0V3cmMwWmtmU2tNbVdaRQ==',
+      'authorization': 'Basic MG9hY3BndTBqN2htNG42ZnEwaDc6bmttZ2l2alI4U2d4OG1GNE9wN2tHRkN0Y0V3cmMwWmtmU2tNbVdaRQ==',
       'content-type': 'application/x-www-form-urlencoded' },
     form: 
     { scope: 'offline_access',
@@ -68,74 +49,204 @@ router.post('/login',function(req,res,next){
     } 
   };
 
+  //useing request module for asynchroneouse call to Okta
 request(options, function (error, response, body) {
   if (error) throw new Error(error);
 
-  console.log(body);
+  
   res.send(body);
 });
 
 });
 
-router.get('/redirect_fd',function(req,res,next){
-  var options = { method: 'GET',
+/*
+redirect to FD route
+After the user gets access token from Okta 
+the front end routes here to send the FD redirect API
+the function returns FD support page
+*/
+router.post('/redirect_fd',function(req,res,next){
+  var options = { 
+  method: 'GET',
+  //followRedirect: false,
   url: 'http://njtestshib.corp.1010data.com/osupport/api/v1.0',
   headers: 
    { 'postman-token': '4ba70d40-b5c9-840f-31ff-a060f0e3fe4f',
      'cache-control': 'no-cache',
-     authorization: 'Bearer '+ req.body.access_token } };
-
+     'authorization': 'Bearer '+ req.body.access_token,
+     'User-Agent': 'request'
+     
+   } 
+  };
+  
+//useing request module for asynchroneouse call to 1010data server
+//where the support page is hosted
 let r = request(options, function (error, response, body) {
   if (error) throw new Error(error);
 
-  console.log(body);
-  //console.log("respose:", response)
-  console.log('r.uri.href', r.uri.href);
-  console.log('response.request.uri.href',response.request.uri.href);
-  res.send(r.uri.href);
+  
+  res.send(response);
+
+  
+});
+
+});
+
+
+/*
+signup route
+the first step of signup, after the user submits their name, email, password, company
+the front end routes here to sent a create user request to Okta
+The function returns the user id and the account status ("staged" - the status prior activated)
+*/
+router.post('/signup', function (req, res, next) {
+  var request = require("request");
+  
+  var options = { 
+    method: 'POST',
+    url: 'https://dev-120406.oktapreview.com/api/v1/users',
+    qs: { activate: 'false' },
+    headers: 
+     { 'postman-token': 'f95508e5-cc36-a79f-a9fe-05b0ca93f331',
+       'cache-control': 'no-cache',
+       'authorization': 'SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu',
+       'content-type': 'application/json',
+       'accept': 'application/json'
+    },
+    body: 
+     { profile: 
+        { firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          email: req.body.email,
+          login: req.body.email,
+          company: req.body.company_name },
+       credentials: 
+        { password: { value: req.body.password }},
+        groupIds: ["00gcsb5ip1KFAMYHz0h7"] 
+      },
+    json: true 
+  };
+
+  //useing request module for asynchroneouse call to to Okta
+  //by using Okta API
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+  
+    console.log(body);
+    res.send(body);
+  });
+});
+
+
+  
+
+/*
+enroll_email route
+After the user signed up, Discover e-commerce enrols email factor 
+authentication. The API used here, sends an email to the user with an activation passcode
+The function returns an email factor id, yet, e-commerce doesnt use it, it is just an indication
+for success
+*/
+router.post('/enroll_email', function(req,res,next){
+  var request = require("request");
+  
+  var options = { method: 'POST',
+  url: "https://dev-120406.oktapreview.com/api/v1/users/"+req.body.user_id+"/factors",
+  qs: { tokenLifetimeSeconds: '1000' },
+  headers: 
+   { 'postman-token': '809ad4a2-3b9e-deb5-aa58-063095d4d94f',
+     'cache-control': 'no-cache',
+     authorization: 'SSWS  00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu',
+     'content-type': 'application/json',
+     accept: 'application/json' },
+  body: 
+   { factorType: 'email',
+     provider: 'OKTA',
+     profile: { email: req.body.email } },
+  json: true 
+};
+
+  //useing request module for asynchroneouse call to to Okta
+  //by using Okta API
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+  
+    
+    res.send(body);
+  });
+  
+
+});
+
+/*
+activate email factor route
+After the user submits the passcode they got in the email
+e-commerce send this API to "Activate and validate" the email factor authentication
+if this function returns success, e-commerce activates the user
+*/
+router.post('/activate_email_factor', function(req,res,next){
+  var request = require("request");
+  
+  var options = { 
+    method: 'POST',
+    url: "https://dev-120406.oktapreview.com/api/v1/users/"+req.body.user_id+"/factors//lifecycle/activate",
+    headers: 
+     { 'postman-token': 'ebdec421-1f57-5656-7ba3-5ca61c3cc2a4',
+       'cache-control': 'no-cache',
+       authorization: 'SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu',
+       'content-type': 'application/json',
+       accept: 'application/json' },
+    body: { passCode: req.body.passCode },
+    json: true
+    
+  };
+  
+  //useing request module for asynchroneouse call to to Okta
+  //by using Okta API
+  console.log("options body", options.body);
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+  
+    
+    res.send(body);
+  });
+  });
 
   /*
-  var r = request.get('http://google.com?q=foo', function (err, res, body) {
-  console.log(r.uri.href);
-  console.log(res.request.uri.href);
-   */
-});
+  activate user route
+  if email factor activation returns success, Discover e-commerce
+  activates the user.
+  This function on success returns the new status "ACTIVATE"
+  */
+  router.post('/activate_user', function(req,res,next){
+    var request = require("request");
+    
+    var options = { 
+      method: 'POST',
+      url: "https://dev-120406.oktapreview.com/api/v1/users/"+req.body.user_id+"/lifecycle/activate",
+      qs: { sendEmail: 'false' },
+      headers: 
+       { 
+         'postman-token': 'c2dbb14e-0578-43a1-f6e8-391c6af63be9',
+         'cache-control': 'no-cache',
+         authorization: 'SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu',
+         accept: 'application/json',
+         'content-type': 'application/json' 
+        },
+        json: true
+       };
+    
+    //useing request module for asynchroneouse call to to Okta
+    //by using Okta API
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error);
+    
+      console.log(body);
+      res.send(body);
+    });
+    
 
-});
-
-
-
-router.post('/signup', function (req, res, next) {
-  User.findOrCreate({
-    where: {
-      email: req.body.email,
-      password: req.body.password
-    },
-    defaults: { // if the user doesn't exist, create including this info
-      //password: req.body.password
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      company_id: req.body.company_id,
-      account_state: req.body.accoun_state,
-      employee_title_id: req.body.employeeTitle,
-      admin: req.body.admin
-    }
-  })
-  .spread((user, created) => {
-  	console.log("User, Created", user,created);
-    if (created) {
-      // with Passport:
-      req.logIn(user, function (err) {
-        if (err) return next(err);
-        res.json(user);
-      });
-      
-    } else {
-      res.sendStatus(401); // this user already exists, you cannot sign up
-    }
-  })
-  .catch(next);
-});
+  });
 
 
 
@@ -191,45 +302,6 @@ router.put('/:userId', function(req,res,next){
 
 
 
-// login, i.e. "you remember `me`, right?"
-// router.post('/login', function (req, res, next) {
-//   console.log('in logout req.user',req.user);
-//   var user=null;
-//   User.findAll({
-//     where: {
-//       email: req.body.email
-
-//     }
-//   }).then(users => {
-//     //if there is no user with the input email - returns WRONG_EMAIL
-//     console.log('findig all users, users', users);
-//     if(!users.length)
-//     {
-//       res.status(401).send('Incorrect email');
-//     }
-//     user = users.filter(function(element) {
-//       if(element.correctPassword(req.body.password))
-//       {
-//         return element;
-//       }
-      
-//     });
-//     //if the password is incorrect - return wrong_password
-//     if(!user)
-//     {
-//       res.status(401).send('Incorrect password');
-//     }
-//     //with Passport:
-//       req.logIn(user[0], function (err) {
-//         if (err) return next(err);
-//         res.json(user[0]);
-//       });
-
-//   }).catch(next);
-    
-//   });
-  
-
 
 // logout, i.e. "please just forget `me`"
 router.delete('/logout', function (req, res, next) {
@@ -239,11 +311,14 @@ router.delete('/logout', function (req, res, next) {
   res.sendStatus(204);
 });
 
-//router.use('/industry', require('./industry'));
-//router.use('/industry', require('./industry'));
 
+/*
+The following functions fetch data from the GUDB (Golbal User Data Base)
+or add new data to it
+returns data to the front end to load on the lists in the signup form
+ */
+//fetching intustry title list
 router.get('/industry',function(req,res,next) {
-    //console.log('GOT INDUSTRIES - industry:',Industry);
     Industry.findAll({})
         .then( industries => {
             console.log('GOT INDUSTRIES:',industries);
@@ -326,10 +401,4 @@ router.put('/api/company', function(req,res,next){
 
 module.exports = router;
 
-//incase a use asks for a non existing route
-//reply with 4040 error
-// router.use(function (req, res, next) {
-//   const err = new Error('Not found.');
-//   err.status = 404;
-//   next(err);
-// });
+

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import {Router, browserHistory } from 'react-router';
 import { push } from 'react-router-redux';
-//const fetch = require("fetch");
 
 const DiscoverOktaOrg = "dev-120406.oktapreview.com";
 /* ------------------    ACTIONS    --------------------- */
@@ -28,12 +27,17 @@ const set_access_token = (access_token) => ({type: SET_ACCESS_TOKRN,access_token
 
 /* ------------------    REDUCER    --------------------- */
 
+/*the auth state. In every single moment 
+all app components need to have access to the current logged user
+we also save here error messages, in the future we can use them in 
+tooltips or error messages on the screen
+*/
 const initialAuthState = {
   currentUser: {},
   login_error: ""
 }
 
-//export default function reducer (currentUser = null, action) {
+  //Auth reducer, this is the function that updates the app global store
   export default function reducer (state=initialAuthState, action) {
     const newState = Object.assign({}, state);
     switch (action.type) {
@@ -73,18 +77,20 @@ const initialAuthState = {
 
 /* ------------       DISPATCHERS     ------------------ */
 
+//converting retun responses from middleware to the data 
+//we need here to update the store
 const resToData = res => res.data;
 
-// a "simple" dispatcher which uses API, changes state, and returns a promise.
-// export const login = credentials => dispatch => {
-//   return axios.put('/api/login/local', credentials)
-//   .then(resToData)
-//   .then(user => {
-//     dispatch(set(user));
-//     return user;
-//   });
-// };
-
+/*
+Login:
+When the user press "submit" in the login page
+this is the function that is called. 
+input: user credentials
+the function calls the backend login to send the info to Okta
+if success: the function updates the store with the current user and 
+the access token and redirect to "service provides" page where the user
+can click on the a link to the the SP they want to go to
+ */
 export const login = credentials => dispatch => {
    return axios.post('/api/login', credentials)
    .then(resToData)
@@ -100,199 +106,91 @@ export const login = credentials => dispatch => {
    
 };
 
+/*
+redirectFD:
+When the user clicks on "support" in the service provicers
+page, this function is being called for Fresh Desk redirecting
+ */
 export const redirectFD = access_token => dispatch => {
-  // var settings = {
-  //   "async": true,
-  //   "crossDomain": true,
-  //   "url": "https://njtestshib.corp.1010data.com/osupport/api/v1.0",
-  //   "method": "GET",
-  //   "headers": {
-  //     "authorization": "Bearer " + access_token,
-  //     "cache-control": "no-cache",
-  //     "postman-token": "b5fcb746-f40c-e24f-f100-998526e21b88",
-  //     'content-type': 'application/x-www-form-urlencoded',
-  //     "Access-Control-Allow-Origin": "*"
-      
-  //   }
-  // }
-  return axios.get('/api/redirect_fd', access_token)
+  
+  return axios.post('/api/redirect_fd', {"access_token": access_token})
   .then(resToData)
   .then(res => {
     console.log("got back to redirectFD front end res", res);
+    
+   //return res.headers.location;
+   return "http:google.com";
+  
   })
   .catch(err => {
     console.log("in redirect FD, got an error",err);
   });
-  //debugger;
-  // axios(settings)
-  // .then(resToData)
-  // .then(res => {
-  //   console.log("res from FD redirect", res);
-  // })
-  // .catch(err => {
-  //   debugger;
-  //   console.log("in redirect FD, got an error",err);
-  //   return err;
-  // });
 
 }
 
-// a "composed" dispatcher which uses the "simple" one, then routes to a page.
-// export const loginAndGoToUser = credentials => dispatch => {
-//   dispatch(login(credentials))
-//   .then(user => browserHistory.push(`/users/${user.id}`))
-//   .catch(err => {
-//     console.error('Problem logging in:', err)
-//     return browserHistory.push('/login')
-//   });
-// };
-
-export const loginAndGoToUser = credentials => dispatch => {
-  dispatch(login(credentials))
-  .then(res => {
-    if(typeof res === 'string'){
-      return dispatch(login_error(res));
-      //return browserHistory.push('/login'); //send a local stet error message to show on the screen
-      //return dispatch(push('/login'));
-
-    }
-    console.log("res from token request", res);
-    return browserHistory.push(`/users/${res.id}`)
-  })
-  .catch(err => {
-    console.error('Problem logging in:', err)
-    return browserHistory.push('/login')
-  });
-};
-
-// export const signup = credentials => dispatch => {
-//   return axios.post('/api/signup', credentials)
-//   .then(resToData)
-//   .then(user => {
-//     dispatch(set(user)); // set current user
-//     return user;
-//   });
-// };
-
+/*
+signup:
+The first step of signing up a user to Okta is calling the create user Okta API
+This function is called when the user presses submit in the first signup form
+input: user credentials
+The function calls the backend signup function that sends the create user API to Okta
+*/
 export const signup = credentials => dispatch => {
-  var settings = {
-    "async": true,
-    "crossDomain": true,
-    "url": "https://dev-120406.oktapreview.com/api/v1/users?activate=false",  // would need to change the Okta domain to be taken from a config file
-    "method": "POST",
-    "headers": {
-      "accept": "application/json",
-      "content-type": "application/json",
-      "authorization": "SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu", //would need to take the API key from a config file
-      "cache-control": "no-cache",
-      "postman-token": "e36725f8-b55c-4d60-3106-15d411bd83eb"
-      
-    },
-    "processData": false,
-    "data": 
-      {
-          "profile": {
-              "firstName": credentials.firstName,
-              "lastName": credentials.lastName,
-              "email": credentials.email,
-              "login": credentials.email,
-              "company": credentials.company_name
-              },
-           "credentials": {
-                "password" : { "value": credentials.password },
-                "recovery_question": {
-                  "question": "Who's your best friend?",                    //do we want a recovery question??
-                  "answer": "lior"
-                }
-            },
-            "groupIds": ["00gcsb5ip1KFAMYHz0h7"]
-      }
-  }
   
-  //debugger;
-  return axios(settings)
+  return axios.post('/api/signup', credentials)
   .then(resToData)
   .then(res => {
-    debugger;
-    console.log('res from create a new user',res);
+    //all dispatch function are for updating the app store
     dispatch(set_user_id(res.id));
     dispatch(set_account_status(res.status));
     dispatch(set_user_email(res.profile.email));
     return enrollEmailFactor({"email": res.profile.email,"user_id": res.id});
-    //return res.id;
+    
   })
   .then(factor_id => {
-    //debugger;
     dispatch(set_email_factor_id(factor_id));
     return browserHistory.push('/passcode');
   })
   .catch(function(err){
-    //debugger;
     console.log("error:", err);
   });
   
 };
 
+/*
+enrollEmailFactor:
+After signup is completed successfully, e-commerce enrolls the 
+second factor authentication which is the email factor.
+This function calls the backend enroll email factor function that calls the
+appropriate Okta API
+ */
 export const enrollEmailFactor = credentials => {
-  //debugger;
-  var settings = {
-    "async": true,
-    "crossDomain": true,
-    "url": "https://dev-120406.oktapreview.com/api/v1/users/" + credentials.user_id + "/factors?tokenLifetimeSeconds=10000",
-    "method": "POST",
-    "headers": {
-      "accept": "application/json",
-      "content-type": "application/json",
-      "authorization": "SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu",
-      "cache-control": "no-cache",
-      "postman-token": "7e7d3ca1-280b-b200-4bbd-c1eeee98cba6"
-    },
-    "processData": false,
-    "data": {
-      "factorType": "email",
-      "provider": "OKTA",
-      "profile": {
-        "email": credentials.email  
-      }
-    }
-  }
   
-  return axios(settings)
+  return axios.post('/api/enroll_email', credentials)
   .then(resToData)
   .then(res => {
-    //debugger;
+    debugger;
     console.log('res from create a new user',res);
-    // dispatch(set_email_factor_id(res.id));
-    // //TODO: redirect to a "passcode" form page
-    // return browserHistory.push('/passcode');
+    
     return res.id;
   }).catch(function(err){
-    //debugger;
+    
     console.log("error:", err);
   });
   
 };
 
+/*
+activateEmail:
+After rge user enters the passcode they got in the email, Dicover
+e-commerce "activates" the email factor by sending the passcode to Okta.
+input: user credentials: user_id and passCode
+this function calls the backend activate email function that activates
+the email by sending the suitable Okta API
+*/
 export const activateEmail = credentials => dispatch => { //credientials should gave: user_id, factor_id and passcode
-  var settings = {
-    "async": true,
-    "crossDomain": true,
-    "url": "https://dev-120406.oktapreview.com/api/v1/users/" + credentials.user_id + "/factors/"+ credentials.factor_id +"/lifecycle/activate",
-    "method": "POST",
-    "headers": {
-      "content-type": "application/json",
-      "accept": "application/json",
-      "authorization": "SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu",
-      "cache-control": "no-cache",
-      "postman-token": "254f6b76-73ef-07ae-6055-5050d17b1135"
-    },
-    "processData": false,
-    "data": {
-      "passCode": credentials.passCode
-    }
-  }
   
-  return axios(settings)
+  return axios.post('/api/activate_email_factor',credentials)
   .then(resToData)
   .then(res => {
     console.log('res from create a new user',res);
@@ -300,41 +198,34 @@ export const activateEmail = credentials => dispatch => { //credientials should 
 
   })
   .catch(err => {
-    //debugger;
     console.log("error:", err);
     return false;
 
   });
 };
 
+/*
+activateUser:
+After activating the email the email factor successfully, Discover e-commerce
+activates the user.
+input: user  credentials that includes user_id
+this function calls the backend activate user which activates the user by sending the suitable
+Okta API
+*/
 export const activateUser = credentials => dispatch => {  //credentials should have user_id
-  //debugger;
-  var settings = {
-    "async": true,
-    "crossDomain": true,
-    "url": "https://dev-120406.oktapreview.com/api/v1/users/"+credentials.user_id+"/lifecycle/activate?sendEmail=false",
-    "method": "POST",
-    "headers": {
-      "content-type": "application/json",
-      "accept": "application/json",
-      "authorization": "SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu",
-      "cache-control": "no-cache",
-      "postman-token": "4e6c868e-f78b-2f04-3a6b-d03afba8de7c"
-    }
-  }
   
-  return axios(settings)
+  return axios.post('/api/activate_user',credentials)
   .then(resToData)
   .then(res => {
+    debugger;
     console.log('res from create a new user',res);
-    //TODO:set the user to be {} again since they now need to login
     dispatch(set_account_status(res.status));
     return browserHistory.push('/login');
   }).catch(err => {
-    //debugger;
     console.log("error:", err);
   });
 }
+
 //signPreferences: update the new created user with their preferences
 //step2 in signup process
 export const signupPreferences = credentials => dispatch => {
@@ -346,28 +237,31 @@ export const signupPreferences = credentials => dispatch => {
   });
 };
 
-
+/*
+signupAndGoToUser: 
+This function is currently not in used
+*/
 export const signupAndGoToUser = credentials => dispatch => {
   dispatch(signupPreferences(credentials))
   .then(user => browserHistory.push(`/users/${user.id}`))
   .catch(err => console.error('Problem signing up:', err));
 };
 
-//a function that sends signs the user in the data base and redirects
-//to the set-preferences page
-export const signupAndGoToUSetPreferences = credentials => dispatch => {
-  dispatch(signup(credentials))
-  .then(user => browserHistory.push('/signup_preferences'))
-  .catch(err => console.error('Problem signing up:', err));
-};
 
-//signup and go to payment
+/*
+signupAndGoToPayment: 
+This function is currently not in used
+*/
 export const signupAndGoToPayment = credentials => dispatch => {
   dispatch(signupPreferences(credentials))
   .then(user => browserHistory.push('/signup_payment'))
   .catch(err => console.error('Problem signing up:', err));
 };
 
+/*
+retrieveLoggedInUser:
+retrieves the logged user and update the store
+ */
 export const retrieveLoggedInUser = () => dispatch => {
   axios.get('/api/me')
   .then(resToData)
@@ -376,85 +270,37 @@ export const retrieveLoggedInUser = () => dispatch => {
   .catch(err => console.error('Problem fetching current user', err));
 };
 
-// optimistic
+/*
+logs out
+*/
 export const logout = () => dispatch => {
   dispatch(remove());
   axios.delete('/api/logout')
   .then(err => console.log('logout unsuccessful', err));
 };
 
+/*
+updateUserAccount:
+when a user changes their account data, this function is called
+input: user credentials
+this function sends the info to the suitable backend route to update Okta and 
+the GUDB
+*/
 export const updateUserAccount = (userId, credentials) => dispatch => {
   console.log('got to updateUserAccount',userId,credentials);
-  return axios.put(`/api/${userId}`, credentials) //////$$$$continue here
+  return axios.put(`/api/${userId}`, credentials) 
   .then(resToData)
   .then(user => {
-    dispatch(set(user)); // set current user
+    dispatch(set(user)); 
     browserHistory.push(`/users/${user.id}`);
     return user;
   });
 };
 
+/*
+setCompany
+when the user changes their company, this function is called
+*/
 export const setCompany = (compoanyId) => dispatch => {
   return dispatch(set_company(compoanyId));
 }
-/*
-dispatch => {
-  dispatch(update(credentials))
-  .then(user => browserHistory.push('/signup_payment'))
-  .catch(err => console.error('Problem signing up:', err));
-};
-*/
-
-
-
-/*
-//the signup API to use when enrolling a user into a group
-var settings = {
-  "async": true,
-  "crossDomain": true,
-  "url": "https://dev-120406.oktapreview.com/api/v1/users?activate=false",
-  "method": "POST",
-  "headers": {
-    "accept": "application/json",
-    "content-type": "application/json",
-    "authorization": "SSWS 00XF7vA6v6gVB_h0f-xKNllmxhw6AZFV2TEVLqA0Uu",
-    "cache-control": "no-cache",
-    "postman-token": "d34ad96e-5759-eb8c-36a1-83d7348f83aa"
-  },
-  "processData": false,
-  "data": "{\n  \"profile\": {\n    \"firstName\": \"Isaac\",\n    \"lastName\": \"Brock\",\n    \"email\": \"isaac@example.com\",\n    \"login\": \"isaac@example.com\"\n  },\n  \"groupIds\": [\n    \"\"\n  ]\n}"
-}
-
-$.ajax(settings).done(function (response) {
-  console.log(response);
-});
- 
-
-
-The Authentication code to get an access token:
-
-var settings = {
-  "async": true,
-  "crossDomain": true,
-  "url": "https://dev-120406.oktapreview.com/oauth2/default/v1/token",
-  "method": "POST",
-  "headers": {
-    "authorization": "Basic MG9hY3BndTBqN2htNG42ZnEwaDc6bmttZ2l2alI4U2d4OG1GNE9wN2tHRkN0Y0V3cmMwWmtmU2tNbVdaRQ==",
-    "cache-control": "no-cache",
-    "postman-token": "9d3d9ece-5102-824c-9c79-4ef58a4cf85e",
-    "content-type": "application/x-www-form-urlencoded"
-  },
-  "data": {
-    "scope": "offline_access",
-    "username": "yasmin_dvir@hotmail.com",  //need to be changed to the user who logged in
-    "grant_type": "password",
-    "password": "Helloyas123"               ////need to be changed to the user who logged in
-  }
-}
-
-$.ajax(settings).done(function (response) {
-  console.log(response);
-});
-
-*/
-

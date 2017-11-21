@@ -1,17 +1,21 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { hashHistory,browserHistory } from 'react-router';
-import { signupAndGoToUser,signupAndGoToUSetPreferences, signup, enrollEmailFactor, activateEmail, activateUser} from '../redux/auth';
+import { signupAndGoToUser, signup, enrollEmailFactor, activateEmail, activateUser} from '../redux/auth';
 
 
 /* -----------------    COMPONENT     ------------------ */
+/*
+Signup form: when the user clicks on "signup" link
+in the navbr, this is the form that is shown
+*/
 
 class Signup extends React.Component {
 
   constructor(props) {
     super(props);
 		this.onSignupSubmit = this.onSignupSubmit.bind(this);
-		//this.checkAndDisplayNewCompanyForm = this.checkAndDisplayNewCompanyForm.bind(this);
+		
   }
 
   render(){
@@ -100,7 +104,8 @@ class Signup extends React.Component {
 			return (event.target.company.value.includes(element.name));
 			}
 		);
-		
+		//constructing the credentials to send to the redux auth
+		//signup function
 		let accountState = company[0].account_state
     	const credentials = {
 			firstName: event.target.firstName.value,
@@ -114,51 +119,25 @@ class Signup extends React.Component {
 			admin: true
 		};
 		let user_id = this.props.signup(credentials);
-		// let oktaUserInfo = {
-		// 	email: credentials.email,
-		// 	user_id: user_id
-
-		// };
-		//debugger;
-		//this.props.enrollEmailFactor(oktaUserInfo);
 	
 	}
-	
-	/*
-	the following function was made to display "add company"
-	form that was supposed to be displayed once the user chooses 
-	"New company" in the company field. 
-	currently I took it out and I will add it to 
-	"company settings"
-	 */
-	// checkAndDisplayNewCompanyForm(event){
-	// 	const { industries } = this.props;
-	// 	//let name = event.target.value.split(' ');
-	// 	let spaceIndex = event.target.value.indexOf(' ');
-	// 	let name = event.target.value.slice(spaceIndex+1);
-	// 	//debugger;
-	// 	//name = name[1];
-	// 	console.log('about to render add company form');
-	// 	if(name === "New Company"){
-	// 		browserHistory.push('add_company');
-
-	// 	}
-	// 	console.log('got change###@@##@@',event.target.value);
-
-	// }
 
 }
 
 
 /* -----------------    CONTAINER     ------------------ */
 
+//mapping between local state to the store state
+//this is the way to get the info from the store
 const mapState = (state) => ({
 	 message: 'Next',
 	 employeeTitles: state.employee_title.list,
 	 companies: state.company.list
 	});
 
-//orginal: const mapDispatch = { signup: signupAndGoToUSetPreferences };
+//mapping dispaching functions to the signup props function
+//this is how we can call function from AUth redux from the signup
+//component
 const mapDispatch = { 
 	signup: signup,
 	enrollEmailFactor: enrollEmailFactor,
@@ -166,7 +145,7 @@ const mapDispatch = {
 	activateUser: activateUser
 };
 
-export default connect(mapState, mapDispatch)(Signup);
+export default connect(mapState, mapDispatch)(Signup);	//conecting to the store
 
 
 

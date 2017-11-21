@@ -2,7 +2,6 @@
 var Sequelize = require('sequelize')
 var db = require('../index.js');
 
-console.log('IIIIIIIIIIIIIIIIin timezone  model');
 /*
 Industry model: holds a list of industry titles
  */

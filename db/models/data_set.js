@@ -2,9 +2,6 @@
 var Sequelize = require('sequelize')
 var db = require('../index.js');
 
-console.log('IIIIIIIIIIIIIIIIin data set');
-
-
 /*
 data set model: holds a list of all datasets
  */

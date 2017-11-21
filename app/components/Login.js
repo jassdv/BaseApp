@@ -1,8 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { login,loginAndGoToUser } from '../redux/auth';
+import { login } from '../redux/auth';
 
 /* -----------------    COMPONENT     ------------------ */
+
+/*
+This is the Login form
+the user submits their email and password
+*/
 
 class Login extends React.Component {
   constructor(props) {
@@ -60,7 +65,6 @@ class Login extends React.Component {
 
 /* -----------------    CONTAINER     ------------------ */
 
-//const mapState = () => ({ message: 'Log in' });
 
 const mapState = state => {
   console.log("login state",state);
@@ -72,13 +76,5 @@ return (
 };
 
 const mapDispatch = { login: login};
-// // equivalent to:
-// const mapDispatch = (dispatch) => {
-//   return {
-//     login: function (credentials) {
-//       dispatch(loginAndGoToUser(credentials));
-//     }
-//   };
-// };
 
 export default connect(mapState, mapDispatch)(Login);

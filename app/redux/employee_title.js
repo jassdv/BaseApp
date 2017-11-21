@@ -21,7 +21,6 @@ const getEmployeeTitles = employeeTitles =>({ type: GET_EMPLOYEE_TITLE_LST, empl
         return Object.assign({}, state, {list: action.employeeTitles})
 
       default:
-        //return initialEmployeeTitleState;
         return state;
   }
 }

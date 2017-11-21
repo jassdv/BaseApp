@@ -4,6 +4,10 @@ import { hashHistory,browserHistory } from 'react-router';
 import { updateUserAccount, setCompany } from '../redux/auth';
 
 /* -----------------    COMPONENT     ------------------ */
+/*
+UserSettings:
+This is the "account setting form"
+*/
 class UserSettings extends React.Component {
     
       constructor(props) {

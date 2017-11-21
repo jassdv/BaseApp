@@ -50,8 +50,9 @@ class Passcode extends React.Component{
         let oktaInfo={
 		    user_id: this.props.user_id,
 		    factor_id: this.props.email_factor_id,
-		    passCode: event.target.passcode
-		}
+		    passCode: event.target.passcode.value
+        }
+        debugger;
         if(this.props.activateEmail(oktaInfo)){
             this.props.activateUser(oktaInfo);
 
@@ -73,7 +74,7 @@ const mapState = (state) => ({
     email_factor_id: state.auth.currentUser.email_factor_id
    });
 
-//orginal: const mapDispatch = { signup: signupAndGoToUSetPreferences };
+
 const mapDispatch = { 
    activateEmail: activateEmail,
    activateUser: activateUser

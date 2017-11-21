@@ -4,9 +4,9 @@ import { connect } from 'react-redux';
 /* -----------------    COMPONENT     ------------------ */
 
 /*
-todo: 
-add links to FD, 
- */
+UserDetail: a component that displays the current logged in user details
+will be used for "account info" 
+*/
 class UserDetail extends React.Component {
 	constructor(props){
 		super(props);
@@ -29,7 +29,6 @@ class UserDetail extends React.Component {
 	}
 }
 
-//const mapState = ({currentUser}) => ({currentUser});
 const mapState = state => {
   return (
     {

@@ -3,9 +3,6 @@ var Sequelize = require('sequelize')
 var db = require('../index.js');
 
 
-console.log('IIIIIIIIIIIIIIIIin company');
-
-
 /*
 company  model: holds company names and for each company,
 its 'account state' that can be one of the following options: 

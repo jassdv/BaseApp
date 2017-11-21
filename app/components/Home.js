@@ -4,7 +4,10 @@ import { connect } from 'react-redux';
 import { logout } from '../redux/auth';
 
 /* -----------------    COMPONENT     ------------------ */
-
+/*
+This is the home page, when the user opens the DIsocver e-commerce
+app this is the view underneath the navbar
+*/
 class Home extends React.Component {
 	constructor(props) {
 		super(props);

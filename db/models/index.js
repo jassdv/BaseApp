@@ -29,5 +29,4 @@ Company.belongsTo(Industry,{through: 'industry'});
 
 console.log('DONE BELONGS TO');
 
-//module.exports = {User, Employee_title, Industry};
 module.exports = db;

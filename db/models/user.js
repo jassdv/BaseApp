@@ -5,7 +5,6 @@ var db = require('../index.js');
 const crypto = require('crypto');
 const _ = require('lodash');
 
-console.log('IIIIIIIIIIIIIIIIin user model');
 /*
 User database: holds all information about a Discover user
 taken from signup form
@@ -95,6 +94,6 @@ const User = module.exports =  db.define('user',{
       }
     
     }
-    //module.exports = User;
+    
 
      

@@ -10,7 +10,6 @@ var Company = require('./db/models/company');
 var Promise = require('bluebird');
 
 function getIndustryIdByTiltle (industries,title) {
-    //console.log('Indestries',industries);
     for(let i=0;i<industries.length;i++){
         if(industries[i].dataValues.title===title){
             console.log(industries[i].dataValues.id);
@@ -21,6 +20,11 @@ function getIndustryIdByTiltle (industries,title) {
     }
 
 }
+
+/*
+This id a "sedding" file. all functions here
+seed data in the GUDB tables
+*/
 
 function generateIndustries () {
     var industries=[];
@@ -418,7 +422,10 @@ function seed () {
     });
   }
 
-
+/*
+this function triggers all the seeding fucntions above
+it is the starting point.
+*/
 db.sync({})
 .then(function () {
   console.log('Seeding database');

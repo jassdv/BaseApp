@@ -29,7 +29,8 @@ class ServiceProviders extends React.Component {
     }
     onSupport(event){
         event.preventDefault();
-        this.props.redirectFD(this.props.access_token);
+        debugger;
+        return this.props.redirectFD(this.props.access_token);
 
 
     }
@@ -44,7 +45,7 @@ class ServiceProviders extends React.Component {
                         onClick={this.onSupport}>
                         Support
                 </button>
-
+<a href="#" onClick={this.onSupport} className="sign-field-title" target="_blank">Support</a>
 <a href={this.props.redirectFD(this.props.access_token)} className="sign-field-title" target="_blank">Support</a>
  */
 /* -----------------    CONTAINER     ------------------ */
